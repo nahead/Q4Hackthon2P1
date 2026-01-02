@@ -7,7 +7,7 @@ export default function HomePage() {
         Evolution of Todo
       </h1>
       <p className="text-xl text-gray-600 mb-8 max-w-md">
-        A secure, multi-user task management application built with FastAPI and Next.js.
+        A secure,   multi-user task management application built with FastAPI and Next.js.
       </p>
       <div className="flex space-x-4">
         <Link
