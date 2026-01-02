@@ -1,16 +1,23 @@
 <!--
   SYNC IMPACT REPORT
   ===================
-  Version Change: Initial → 1.0.0 (NEW CONSTITUTION)
+  Version Change: 1.0.0 → 2.0.0 (MAJOR - Phase II transition)
 
   Modified Principles:
-    - N/A (new constitution)
+    - Architectural Continuity → Architectural Continuity (redefined for full-stack)
+    - Simplicity with Intent → Separation of Concerns (new emphasis)
+    - Deterministic Behavior → API-First Design (new focus)
+    - AI-First Collaboration → AI-Native Workflow (retained, refined)
+    - Explicit State Management → Security by Default (new emphasis)
+    - Interface Agnosticism → retained with web API focus
 
   Added Sections:
-    - All sections (new constitution)
+    - Monorepo & Spec Governance (new for Phase II)
+    - Security Guarantees (new comprehensive section)
+    - Multi-User Data Isolation requirements
 
   Removed Sections:
-    - N/A (new constitution)
+    - Phase I constraints (console-only, in-memory storage)
 
   Templates Updated:
     - ✅ .specify/templates/plan-template.md - Reviewed for Constitution Check section
@@ -21,150 +28,204 @@
     - None
 -->
 
-# Evolution of Todo Constitution
+# Evolution of Todo Constitution - Phase II
 
 ## Core Principles
 
-### I. Architectural Continuity
+### I. Spec-Driven Development
 
-Every Phase I decision must remain compatible with future phases (II-V). No abstraction or pattern introduced now should create blocking conflicts when migrating to FastAPI, SQLModel, Neon DB, AI agents, Kubernetes, or event-driven architecture. Architecture decisions must anticipate these transitions without premature implementation.
+All implementation MUST originate from structured specifications managed by Spec-Kit Plus. Specs are the single source of truth and define all requirements, API contracts, database schemas, and UI behavior. No feature shall be implemented without a corresponding spec reference.
 
-**Rationale**: This project is explicitly designed as a phased evolution. Premature lock-in or patterns that don't translate to web, cloud, or AI environments would force refactoring and violate the project's fundamental purpose.
+**Rationale**: Ensures traceability, prevents scope creep, and maintains alignment between frontend, backend, database, and authentication layers. Specifications enable clear review and validation at every stage.
 
-### II. Simplicity with Intent
+### II. Architectural Continuity
 
-No unnecessary abstractions, but every component must have a clear, documented upgrade path. Avoid over-engineering (repositories, ORMs, microservices, adapters, event buses) while maintaining framework-agnostic design. Business logic must be independent of any interface layer.
+Phase II MUST evolve cleanly from Phase I without breaking core domain logic. The todo domain (tasks, status, operations) remains the same, but the implementation shifts from console to web, in-memory to persistent storage, single-user to multi-user. Business logic MUST be preserved and reusable.
 
-**Rationale**: Phase I serves as the architectural foundation. Clear upgrade paths enable seamless transitions to more complex architectures without complete rewrites, while avoiding premature complexity ensures the foundation remains understandable and testable.
+**Rationale**: Maintains conceptual continuity across phases while enabling the architectural evolution from console app to full-stack web application. Core domain operations (add, list, update, complete, delete) remain invariant across all phases.
 
-### III. Deterministic Behavior
+### III. Separation of Concerns
 
-All application behavior must be predictable, testable, and free of side effects. Commands must have clear inputs, outputs, and error paths. State transitions must be explicit and observable. No magic behavior or implicit dependencies.
+Frontend, backend, database, and authentication layers MUST remain clearly isolated. Frontend SHALL NOT directly access the database or implement business logic. Backend SHALL NOT contain UI logic. Authentication MUST be a distinct, reusable service. Each layer communicates only through defined interfaces (REST APIs, database models, authentication tokens).
 
-**Rationale**: Testability and predictability are critical for both current development and future AI agent integration. Deterministic behavior enables reliable testing, debugging, and automation across all phases.
+**Rationale**: Enables independent development, testing, and scaling of each layer. Prevents tight coupling that would impede future evolution (Phase III: AI agents, Phase IV: Kubernetes, Phase V: event-driven architecture).
 
-### IV. AI-First Collaboration
+### IV. API-First Design
 
-Use Claude Code + Spec-Kit Plus to generate structure, not boilerplate clutter. Leverage AI for planning, code generation, and documentation during development, but AI inference MUST NOT be used at runtime. AI is a development accelerator, not a runtime dependency.
+Backend behavior MUST be defined by REST contracts before UI implementation. Every feature MUST have a corresponding API specification including endpoints, request/response schemas, error handling, and authentication requirements. Frontend implementation MUST align exactly with the API contracts.
 
-**Rationale**: Accelerates development while maintaining clear boundaries between development tooling and production runtime. Ensures Phase I remains lightweight and self-contained without external AI dependencies.
+**Rationale**: Frontend and backend teams can work in parallel with clear contracts. API stability ensures frontend remains functional as backend evolves. Simplifies testing, documentation, and future integration with AI agents.
 
-### V. Explicit State Management
+### V. Security by Default
 
-All data is in-memory, clearly scoped, and lifecycle-controlled. State boundaries must be explicit (service-level, session-level, or application-level). No implicit global state. State transitions must be documented and testable.
+Authentication, authorization, and user isolation are mandatory and enforced consistently. All API endpoints MUST require valid JWT tokens. User identity MUST be extracted from JWT and match route context. Backend MUST filter all data by authenticated user ID. No cross-user data access is permitted.
 
-**Rationale**: In-memory architecture requires careful state management to prevent bugs, ensure testability, and prepare for future database migration. Clear state boundaries map directly to future database schema and caching strategies.
+**Rationale**: Multi-user environments require strict security boundaries. JWT verification at the API layer and user-scoped data queries prevent data leaks. Security enforcement must be automatic, not optional.
 
-### VI. Interface Agnosticism
+### VI. AI-Native Workflow
 
-Domain operations MUST be callable programmatically without tight coupling to CLI or any UI layer. Commands and services should expose clean, typed interfaces that can be invoked from any context (CLI, API, test, or AI agent).
+Claude Code is the sole implementation agent; no manual coding is permitted. All development, planning, coding, and review MUST be executed through Claude Code with Spec-Kit Plus tools. Humans provide requirements and approve; AI generates all code, tests, and documentation.
 
-**Rationale**: Ensures business logic remains reusable across Phase II (web API), Phase III (AI agents), and beyond. Prevents UI logic from polluting domain logic.
+**Rationale**: Ensures consistent adherence to specs and architectural patterns. Accelerates development while maintaining quality standards. All changes are traceable to prompts and decisions recorded in Prompt History Records (PHRs).
 
 ## Technical Standards
 
-### Language & Platform
-- **Language**: Python 3.11+ (MUST be typed with type hints)
-- **Interface**: Console CLI-based (NO GUI, NO web frameworks in Phase I)
-- **Storage**: In-memory only (NO files, NO databases, NO disk persistence)
-- **Execution**: Synchronous (NO async, NO threading, NO concurrency)
+### Backend Standards
+- **Framework**: FastAPI with RESTful endpoints
+- **ORM**: SQLModel for database schema alignment and type safety
+- **Architecture**: Stateless services with JWT-based authentication
+- **API Design**: RESTful contracts defined in specifications
+- **Error Handling**: Consistent error taxonomy with status codes
+- **Authentication**: JWT token verification on every request
+- **Database**: Neon Serverless PostgreSQL (managed, serverless)
 
-### Architecture Style
-- **Domain-Driven Structure**: Organize by domain concerns (tasks, services, commands)
-- **Separation of Concerns**: Clear boundaries between UI (CLI), domain (business logic), and application (coordination)
-- **Typed Signatures**: All public functions MUST have explicit type hints
-- **Docstrings**: Every module, class, and public function MUST have intent documentation
+### Frontend Standards
+- **Framework**: Next.js 16+ using App Router
+- **UI Pattern**: Responsive web interface with clear task state representation
+- **API Client**: Centralized API client for all backend communication
+- **Authentication**: Better Auth for frontend authentication flow
+- **State Management**: Component-level state with API-driven updates
+- **Type Safety**: TypeScript for all frontend code
 
-### Data Model Requirements
-- **Unique ID**: Every todo MUST have a unique identifier (database-ready type)
-- **Title**: Required string field
-- **Description**: Optional string field
-- **Status**: Enum (pending/completed) - extensible for future phases
-- **Created Timestamp**: ISO 8601 format, timezone-aware
-- **Schema**: Database-ready structure (maps cleanly to SQLModel in Phase II)
+### Authentication Standards
+- **Frontend**: Better Auth handles login/logout flows
+- **Token Issuance**: Backend issues JWT tokens on successful authentication
+- **Token Verification**: Backend verifies JWT on every API request
+- **User Context**: User identity extracted from JWT must match route parameters
+- **Session Management**: No shared session state between frontend and backend
+- **Secret Management**: JWT secret managed via environment variables
 
-### Command Operations
-All commands MUST map cleanly to future API endpoints:
-1. **Add todo**: Create new todo with validation
-2. **List todos**: Retrieve filtered/sorted list
-3. **Update todo**: Modify existing todo fields
-4. **Mark complete**: Change status to completed
-5. **Delete todo**: Remove from in-memory store
-
-### Error Handling
-- **Graceful Handling**: Invalid commands MUST NOT crash the application
-- **Clear Messages**: User-friendly error messages with actionable guidance
-- **No Silent Failures**: All errors MUST be surfaced or explicitly logged
-- **No Unhandled Exceptions**: Normal usage paths MUST have explicit error handling
+### Data Standards
+- **Storage**: Persistent storage in Neon Serverless PostgreSQL
+- **ORM**: SQLModel for schema definition and queries
+- **User Isolation**: All tasks scoped to authenticated users (user_id foreign key)
+- **Schema Alignment**: Database schema defined in specs and mirrored in SQLModel
+- **Migration**: Schema changes must be backward compatible where possible
+- **Data Access**: No direct database access from frontend (API only)
 
 ## Constraints
 
-### Prohibited in Phase I
-- External databases or ORMs
-- Web frameworks (FastAPI, Flask, Django, etc.)
-- File system persistence or configuration files
-- Async/await patterns
-- Threading or multiprocessing
-- AI inference at runtime
-- Over-engineering patterns (repositories, adapters, event buses, microservices)
-- GUI frameworks (Tkinter, PyQt, etc.)
-- Cloud services or APIs
+### Prohibited in Phase II
+- Console-based UI or command-line interfaces
+- In-memory-only storage (all data must persist)
+- Shared session state between frontend and backend
+- Direct database access from frontend
+- Bypassing JWT verification on any endpoint
+- Manual code edits outside Claude Code
+- Implementing features not defined in specs
+- Accessing or modifying tasks across users
+- Phase-advanced features (AI chatbot, event systems, Kubernetes)
 
 ### Required
-- Pure Python standard library (no external dependencies unless justified)
-- In-memory data structures only
-- Synchronous execution
-- Console I/O (stdin/stdout/stderr)
-- Type hints on all public interfaces
-- Docstrings explaining intent
+- FastAPI backend with RESTful endpoints
+- SQLModel for ORM and schema alignment
+- Next.js 16+ frontend with App Router
+- Better Auth on frontend for authentication
+- JWT-based authentication with token verification
+- Neon Serverless PostgreSQL for persistent storage
+- User-scoped data access and filtering
+- Spec-driven development for all features
+- Claude Code as sole implementation agent
+
+## Monorepo & Spec Governance
+
+### Repository Structure
+Repository MUST follow Spec-Kit monorepo structure:
+- `/specs` - All specifications organized by type
+  - `/features` - Feature specifications and requirements
+  - `/api` - API contracts, endpoints, request/response schemas
+  - `/database` - Database schemas, migrations, entity definitions
+  - `/ui` - UI specifications, component definitions, user flows
+
+### Navigation & Coding Rules
+CLAUDE.md files define navigation and coding rules at:
+- Root `/CLAUDE.md` - Project-level agent instructions
+- `/frontend/CLAUDE.md` - Frontend-specific rules and patterns
+- `/backend/CLAUDE.md` - Backend-specific rules and patterns
+
+### Spec References
+Claude Code MUST reference specs using `@specs` paths. For example:
+- "Implement task creation per @specs/api/endpoints.md#post-tasks"
+- "Database schema defined in @specs/database/schema.md#tasks-table"
+
+### Authority
+Specs are the single source of truth. All implementation must trace back to a spec file. Discrepancies between code and specs must be resolved by updating the spec first, then the code.
+
+## Security Guarantees
+
+### Authentication Enforcement
+- All API endpoints require a valid JWT token
+- Requests without a token return 401 Unauthorized
+- Invalid tokens return 401 Unauthorized with descriptive message
+- Token expiration must be handled with appropriate 401 response
+
+### Authorization & Data Isolation
+- User identity extracted from JWT must match route user context
+- Backend filters all data by authenticated user ID
+- No endpoint may return data belonging to another user
+- No endpoint may allow modification of another user's data
+- Cross-user access attempts return 403 Forbidden
+
+### Token Management
+- JWT secret managed via environment variables (never in code)
+- Tokens must include user ID and expiration claim
+- Token payload must be signed with HMAC-SHA256 or equivalent
+- Frontend stores token securely (httpOnly cookie recommended)
+
+### Error Handling
+- Authentication failures MUST NOT reveal whether user exists
+- Authorization errors must be generic (no data leakage)
+- Sensitive information must not appear in error messages
+- Server errors (500) must be logged without exposing internals
 
 ## Quality Standards
 
 ### Code Quality
-- **Clean Pythonic Code**: Follow PEP 8, leverage idiomatic Python
-- **Meaningful Naming**: Names must reveal intent, avoid abbreviations
-- **Minimal Documentation**: Docstrings only where intent isn't obvious from code
-- **Predictable Control Flow**: Linear, easy to trace execution paths
-- **Human-Readable Output**: Console output must be clear and actionable
+- **Clean Idiomatic Code**: Follow framework best practices (FastAPI, Next.js)
+- **Type Safety**: TypeScript on frontend, type hints on backend
+- **Predictable Responses**: Consistent API response structure
+- **Clear Error Messages**: User-friendly error messages with actionable guidance
+- **Minimal Dependencies**: Prefer framework-native solutions over external libraries
 
 ### Failure Conditions
-- Mixing UI logic with domain logic (VIOLATES Principle II)
-- Designing for databases in Phase I (VIOLATES Principle I)
-- Introducing web or cloud concepts early (VIOLATES Principle I)
-- Writing code that cannot scale conceptually into later phases (VIOLATES Principle I)
-- Tight coupling between CLI and business logic (VIOLATES Principle VI)
+- Mixing frontend and backend responsibilities
+- Accessing or modifying tasks across users
+- Implementing features not defined in specs
+- Skipping authentication on any endpoint
+- Writing code without a corresponding spec reference
+- Manual coding outside Claude Code
 
 ### Success Criteria
-- Application runs fully in memory via console
-- All todo operations work correctly
-- Codebase is readable, modular, and testable
-- Zero dead code or speculative features
-- Ready to be extended without refactor in Phase II
+- All 5 basic todo features work as a web application
+- Multi-user support with strict user data isolation
+- REST API behaves exactly as specified in contracts
+- Frontend and backend integrate via authenticated API calls
+- Database persistence verified across sessions
+- Codebase is reviewable, traceable, and spec-aligned
+- Phase II is ready to evolve into Phase III (AI chatbot)
 
 ## Forward-Compatibility Requirements
 
-### Phase II: FastAPI + SQLModel + Neon DB
-- Business logic MUST be framework-agnostic
-- Data model MUST be database-ready (SQLModel-compatible structure)
-- Service methods MUST be extractable to API endpoints
-- Command handlers MUST map to HTTP endpoints
-
 ### Phase III: Natural-Language AI Agents
-- Domain operations MUST be callable programmatically
-- Intent documentation MUST enable AI understanding
-- Clear separation between interpretation (future) and execution (now)
+- All API endpoints remain accessible to AI agents
+- Domain operations callable programmatically via HTTP
+- Clear separation between interpretation (AI) and execution (API)
+- JWT authentication supported by AI agent integration
+- No UI-specific logic in backend (agents bypass UI)
 
 ### Phase IV: Containerization & Kubernetes
-- Configuration MUST be environment-based (no hardcoded values)
-- Stateless design where possible
-- Startup/shutdown hooks MUST be explicit
-- Health checks MUST be definable
+- Configuration environment-based (no hardcoded values)
+- Stateless backend design (state in database, not memory)
+- Clear startup/shutdown hooks
+- Health check endpoints definable
+- Secrets managed via environment variables (already done)
 
 ### Phase V: Event-Driven Architecture (Kafka + Dapr)
-- Command patterns MUST be composable
-- State transitions MUST be observable
+- API endpoints remain as primary interface
+- State transitions observable via database
 - No circular dependencies between services
 - Clear boundaries for future event sourcing
+- Current REST API compatible with event ingestion
 
 ## Governance
 
@@ -174,9 +235,10 @@ All commands MUST map cleanly to future API endpoints:
 3. Document transition strategy if required
 4. Update constitution with version bump following semantic versioning
 5. Review and propagate changes to dependent templates
+6. Create Prompt History Record (PHR) documenting the change
 
 ### Versioning Policy
-- **MAJOR (X.0.0)**: Backward incompatible governance changes, principle removal or redefinition
+- **MAJOR (X.0.0)**: Backward incompatible governance changes, principle removal or redefinition, phase transitions
 - **MINOR (x.Y.0)**: New principle or section added, material guidance expansion
 - **PATCH (x.y.Z)**: Clarifications, wording fixes, non-semantic refinements
 
@@ -185,11 +247,14 @@ All commands MUST map cleanly to future API endpoints:
 - All decisions MUST justify deviations with complexity tracking
 - Architectural Decision Records (ADRs) MUST cite constitution principles
 - Code reviews MUST verify compliance with constraints and standards
+- All code changes MUST trace to spec references
 
 ### Authoritative Sources
 - **This Constitution**: Governs all project phases
 - **CLAUDE.md**: Agent-specific execution rules and tooling guidance
 - **Feature Specs**: User requirements and acceptance criteria (MUST align with constitution)
 - **Plans**: Technical decisions and architecture (MUST pass constitution gates)
+- **API Contracts**: REST endpoint definitions (MUST align with authentication standards)
+- **Database Schemas**: Data model definitions (MUST align with data isolation requirements)
 
-**Version**: 1.0.0 | **Ratified**: 2026-01-01 | **Last Amended**: 2026-01-01
+**Version**: 2.0.0 | **Ratified**: 2026-01-01 | **Last Amended**: 2026-01-02
